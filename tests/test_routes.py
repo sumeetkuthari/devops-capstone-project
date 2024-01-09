@@ -127,7 +127,6 @@ class TestAccountService(TestCase):
     def test_get_account(self):
         """It should Read a single Account"""
         account = self._create_accounts(1)[0]
-        # make a call to self.client.post() to create the account
         resp = self.client.get(
             f"{BASE_URL}/{account.id}", content_type="application/json"
         )
@@ -145,3 +144,21 @@ class TestAccountService(TestCase):
         # assert that the resp.status_code is status.HTTP_404_NOT_FOUND
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
+    def test_update_an_account(self):
+        """It Should update an Account"""
+        account = self._create_accounts(1)[0]
+        new_account = AccountFactory()
+        resp = self.client.put(
+            f"{BASE_URL}/{account.id}",
+            json=new_account.serialize(),
+            content_type="application/json"
+        )
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        data = resp.get_json()
+        self.assertEqual(data["name"], new_account.name)
+        
+    def test_update_bad_account(self):
+        """It Should not update a non-existant account"""
+        resp = self.client.put(f"{BASE_URL}/0")
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+ 
